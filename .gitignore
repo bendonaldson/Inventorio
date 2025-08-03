@@ -96,6 +96,9 @@ local.properties
 # Mobile Tools for Java (J2ME)
 .mtj.tmp/
 
+# Spring Boot Properties
+application.properties
+
 # Package Files #
 *.jar
 *.war
