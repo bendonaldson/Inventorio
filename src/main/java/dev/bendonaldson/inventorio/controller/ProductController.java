@@ -2,6 +2,7 @@ package dev.bendonaldson.inventorio.controller;
 
 import dev.bendonaldson.inventorio.model.Product;
 import dev.bendonaldson.inventorio.service.ProductService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -11,18 +12,26 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
-import java.util.Optional;
 
+/**
+ * REST controller for managing product-related API endpoints.
+ */
 @RestController
-@RequestMapping("/products")
+@RequestMapping("/api/products")
 public class ProductController {
 
+    private final ProductService productService;
+
     @Autowired
-    private ProductService productService;
+    public ProductController(ProductService productService) {
+        this.productService = productService;
+    }
 
     @GetMapping
     public List<Product> findAll() {
@@ -30,33 +39,35 @@ public class ProductController {
     }
 
     @GetMapping("/{id}")
-    public Optional<Product> findById(@PathVariable Long id) {
-        return productService.findById(id);
+    public Product findById(@PathVariable Long id) {
+        return productService.findById(id)
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found with id " + id));
     }
 
-    // Create a Product
-    @ResponseStatus(HttpStatus.CREATED) // 201
+    @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public Product create(@RequestBody Product product) {
-        return productService.save(product);
+    public Product create(@Valid @RequestBody Product product, @RequestParam(required = false) Long categoryId) {
+        if (product.getCategory() != null && categoryId != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot specify category in both body and parameter.");
+        }
+        return productService.save(product, categoryId);
     }
 
-    // Update a Product
-    @PutMapping
-    public Product update(@RequestBody Product product) {
-        return productService.save(product);
+    @PutMapping("/{id}")
+    public Product update(@PathVariable Long id, @Valid @RequestBody Product product, @RequestParam(required = false) Long categoryId) {
+        if (product.getCategory() != null && categoryId != null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot specify category in both body and parameter.");
+        }
+        if (productService.findById(id).isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found with id " + id);
+        }
+        product.setId(id);
+        return productService.save(product, categoryId);
     }
 
-    // Delete a Product
-    @ResponseStatus(HttpStatus.NO_CONTENT) // 204
+    @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {
         productService.deleteById(id);
-    }
-
-    // Find Product by Name
-    @GetMapping("/find/name/{name}")
-    public List<Product> findByName(@PathVariable String name) {
-        return productService.findByName(name);
     }
 }

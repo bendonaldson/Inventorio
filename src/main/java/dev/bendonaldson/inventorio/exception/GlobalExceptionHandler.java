@@ -6,20 +6,17 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.util.HashMap;
 import java.util.Map;
 
+/**
+ * Global exception handler for the Inventorio application.
+ */
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    /**
-     * Handles MethodArgumentNotValidException, which is thrown when
-     * @Valid is used on a request body and validation fails.
-     *
-     * @param ex The exception object containing validation errors.
-     * @return A map of field names to their corresponding error messages.
-     */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public Map<String, String> handleValidationException(MethodArgumentNotValidException ex) {
@@ -27,17 +24,9 @@ public class GlobalExceptionHandler {
         ex.getBindingResult().getFieldErrors().forEach((error) -> {
             errors.put(error.getField(), error.getDefaultMessage());
         });
-
         return errors;
     }
 
-    /**
-     * Handles ConstraintViolationException, which is thrown during
-     * Hibernate's persistence-level validation.
-     *
-     * @param ex The exception object containing validation errors.
-     * @return A map of field names to their corresponding error messages.
-     */
     @ResponseStatus(HttpStatus.BAD_REQUEST)
     @ExceptionHandler(ConstraintViolationException.class)
     public Map<String, String> handleConstraintViolationException(ConstraintViolationException ex) {
@@ -47,5 +36,12 @@ public class GlobalExceptionHandler {
             errors.put(fieldName.substring(fieldName.lastIndexOf('.') + 1), violation.getMessage());
         });
         return errors;
+    }
+
+    @ExceptionHandler(ResponseStatusException.class)
+    public Map<String, String> handleResponseStatusException(ResponseStatusException ex) {
+        Map<String, String> error = new HashMap<>();
+        error.put("error", ex.getReason());
+        return error;
     }
 }
