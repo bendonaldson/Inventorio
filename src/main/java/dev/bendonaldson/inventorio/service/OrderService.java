@@ -53,7 +53,7 @@ public class OrderService {
                 item.setOrder(order);
                 Product product = productService.findById(item.getProduct().getId())
                         .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                Product product = findProductByIdForUpdate(item.getProduct().getId());
+                                "Product with ID " + item.getProduct().getId() + " not found."));
 
                 if (product.getStockQuantity() < item.getQuantity()) {
                     throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
@@ -63,11 +63,9 @@ public class OrderService {
                 // Deduct stock and set current price
                 product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
                 item.setPriceAtTimeOfPurchase(product.getPrice());
+                item.setProduct(product);
                 productService.save(product, product.getCategory() != null ? product.getCategory().getId() : null);
-                productsToUpdate.add(product);
-                categoryIds.add(product.getCategory() != null ? product.getCategory().getId() : null);
             }
-            productService.saveAll(productsToUpdate, categoryIds);
         }
 
         return orderRepository.save(order);
