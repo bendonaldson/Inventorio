@@ -2,6 +2,8 @@ package dev.bendonaldson.inventorio.model;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -36,17 +38,18 @@ public class Order {
     private LocalDateTime orderDate;
 
     @NotBlank(message = "Status is required")
-    private String status; // "PENDING", "PROCESSING", "SHIPPED", "DELIVERED", "CANCELLED"
+    @Enumerated(EnumType.STRING)
+    private OrderStatus status;
 
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
     public Order() {
         this.orderDate = LocalDateTime.now(); // Default to current time
-        this.status = "PENDING"; // Default Status
+        this.status = OrderStatus.PENDING; // Default Status
     }
 
-    public Order(String status) {
+    public Order(OrderStatus status) {
         this();
         this.status = status;
     }
