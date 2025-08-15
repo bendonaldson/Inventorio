@@ -9,7 +9,6 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
-import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.Setter;
@@ -37,7 +36,7 @@ public class Order {
     @NotNull(message = "Order date is required")
     private LocalDateTime orderDate;
 
-    @NotBlank(message = "Status is required")
+    @NotNull(message = "Status is required")
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
