@@ -1,14 +1,17 @@
 package dev.bendonaldson.inventorio.service;
 
+import dev.bendonaldson.inventorio.dto.OrderItemRequestDto;
+import dev.bendonaldson.inventorio.dto.OrderRequestDto;
+import dev.bendonaldson.inventorio.exception.InsufficientStockException;
+import dev.bendonaldson.inventorio.exception.ResourceNotFoundException;
 import dev.bendonaldson.inventorio.model.Order;
 import dev.bendonaldson.inventorio.model.OrderItem;
 import dev.bendonaldson.inventorio.model.Product;
 import dev.bendonaldson.inventorio.repository.OrderRepository;
+import dev.bendonaldson.inventorio.repository.ProductRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,12 +24,12 @@ import java.util.Optional;
 public class OrderService {
 
     private final OrderRepository orderRepository;
-    private final ProductService productService;
+    private final ProductRepository productRepository;
 
     @Autowired
-    public OrderService(OrderRepository orderRepository, ProductService productService) {
+    public OrderService(OrderRepository orderRepository, ProductRepository productRepository) {
         this.orderRepository = orderRepository;
-        this.productService = productService;
+        this.productRepository = productRepository;
     }
 
     public List<Order> findAll() {
@@ -37,42 +40,33 @@ public class OrderService {
         return orderRepository.findById(id);
     }
 
-    /**
-     * Creates a new order and processes its items.
-     * This method is transactional to ensure data consistency.
-     *
-     * @param order The order object to save, containing its order items.
-     * @return The saved order.
-     * @throws ResponseStatusException if product stock is insufficient.
-     */
     @Transactional
-    public Order save(Order order) {
-        // Ensure the bidirectional relationship is set before saving
-        if (order.getOrderItems() != null) {
-            for (OrderItem item : order.getOrderItems()) {
-                item.setOrder(order);
-                Product product = productService.findById(item.getProduct().getId())
-                        .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND,
-                                "Product with ID " + item.getProduct().getId() + " not found."));
+    public Order save(OrderRequestDto orderDto) {
+        Order order = new Order();
 
-                if (product.getStockQuantity() < item.getQuantity()) {
-                    throw new ResponseStatusException(HttpStatus.BAD_REQUEST,
-                            "Insufficient stock for product: " + product.getName() + ". Available: " + product.getStockQuantity());
-                }
+        for (OrderItemRequestDto itemDto : orderDto.items()) {
+            Product product = productRepository.findById(itemDto.productId())
+                    .orElseThrow(() -> new ResourceNotFoundException("Product with ID " + itemDto.productId() + " not found."));
 
-                // Deduct stock and set current price
-                product.setStockQuantity(product.getStockQuantity() - item.getQuantity());
-                item.setPriceAtTimeOfPurchase(product.getPrice());
-                item.setProduct(product);
-                productService.save(product, product.getCategory() != null ? product.getCategory().getId() : null);
+            if (product.getStockQuantity() < itemDto.quantity()) {
+                throw new InsufficientStockException("Insufficient stock for product: " + product.getName() + ". Available: " + product.getStockQuantity());
             }
+
+            product.setStockQuantity(product.getStockQuantity() - itemDto.quantity());
+            productRepository.save(product);
+
+            OrderItem orderItem = new OrderItem(product, itemDto.quantity(), product.getPrice());
+            order.addOrderItem(orderItem);
         }
 
         return orderRepository.save(order);
     }
 
     public void deleteById(Long id) {
+        if (!orderRepository.existsById(id)) {
+            throw new ResourceNotFoundException("Order not found with id " + id);
+        }
+
         orderRepository.deleteById(id);
     }
-
 }

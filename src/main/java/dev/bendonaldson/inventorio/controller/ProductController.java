@@ -1,5 +1,9 @@
 package dev.bendonaldson.inventorio.controller;
 
+import dev.bendonaldson.inventorio.dto.ProductRequestDto;
+import dev.bendonaldson.inventorio.dto.ProductResponseDto;
+import dev.bendonaldson.inventorio.exception.ResourceNotFoundException;
+import dev.bendonaldson.inventorio.mapper.ProductMapper;
 import dev.bendonaldson.inventorio.model.Product;
 import dev.bendonaldson.inventorio.service.ProductService;
 import jakarta.validation.Valid;
@@ -12,12 +16,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * REST controller for managing product-related API endpoints.
@@ -27,42 +30,39 @@ import java.util.List;
 public class ProductController {
 
     private final ProductService productService;
+    private final ProductMapper productMapper;
 
     @Autowired
-    public ProductController(ProductService productService) {
+    public ProductController(ProductService productService, ProductMapper productMapper) {
         this.productService = productService;
+        this.productMapper = productMapper;
     }
 
     @GetMapping
-    public List<Product> findAll() {
-        return productService.findAll();
+    public List<ProductResponseDto> findAll() {
+        return productService.findAll().stream()
+                .map(productMapper::toResponseDto)
+                .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}")
-    public Product findById(@PathVariable Long id) {
+    public ProductResponseDto findById(@PathVariable Long id) {
         return productService.findById(id)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found with id " + id));
+                .map(productMapper::toResponseDto)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with id " + id));
     }
 
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
-    public Product create(@Valid @RequestBody Product product, @RequestParam(required = false) Long categoryId) {
-        if (product.getCategory() != null && categoryId != null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot specify category in both body and parameter.");
-        }
-        return productService.save(product, categoryId);
+    public ProductResponseDto create(@Valid @RequestBody ProductRequestDto productDto) {
+        Product savedProduct = productService.save(productDto);
+        return productMapper.toResponseDto(savedProduct);
     }
 
     @PutMapping("/{id}")
-    public Product update(@PathVariable Long id, @Valid @RequestBody Product product, @RequestParam(required = false) Long categoryId) {
-        if (product.getCategory() != null && categoryId != null) {
-            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "Cannot specify category in both body and parameter.");
-        }
-        if (productService.findById(id).isEmpty()) {
-            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Product not found with id " + id);
-        }
-        product.setId(id);
-        return productService.save(product, categoryId);
+    public ProductResponseDto update(@PathVariable Long id, @Valid @RequestBody ProductRequestDto productDto) {
+        Product updatedProduct = productService.update(id, productDto);
+        return productMapper.toResponseDto(updatedProduct);
     }
 
     @ResponseStatus(HttpStatus.NO_CONTENT)
