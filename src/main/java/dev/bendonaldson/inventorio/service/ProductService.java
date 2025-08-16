@@ -6,10 +6,13 @@ import dev.bendonaldson.inventorio.model.Category;
 import dev.bendonaldson.inventorio.model.Product;
 import dev.bendonaldson.inventorio.repository.CategoryRepository;
 import dev.bendonaldson.inventorio.repository.ProductRepository;
+import dev.bendonaldson.inventorio.repository.specification.ProductSpecification;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -25,8 +28,12 @@ public class ProductService {
         this.categoryRepository = categoryRepository;
     }
 
-    public List<Product> findAll() {
-        return productRepository.findAll();
+    public List<Product> findAll(String name, Long categoryId, BigDecimal minPrice, BigDecimal maxPrice) {
+        Specification<Product> spec = ProductSpecification.hasName(name)
+                .and(ProductSpecification.inCategory(categoryId))
+                .and(ProductSpecification.priceBetween(minPrice, maxPrice));
+
+        return productRepository.findAll(spec);
     }
 
     public Optional<Product> findById(Long id) {
