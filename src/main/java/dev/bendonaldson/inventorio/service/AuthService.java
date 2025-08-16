@@ -10,6 +10,7 @@ import dev.bendonaldson.inventorio.repository.UserRepository;
 import dev.bendonaldson.inventorio.security.JwtService;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -51,7 +52,7 @@ public class AuthService {
         );
 
         var user = userRepository.findByUsername(request.username())
-                .orElseThrow();
+                .orElseThrow(() -> new UsernameNotFoundException("User '" + request.username() + "' not found."));
         var jwtToken = jwtService.generateToken(user);
 
         return new AuthResponseDto(jwtToken);

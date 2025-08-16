@@ -1,7 +1,10 @@
 package dev.bendonaldson.inventorio.security;
 
+import dev.bendonaldson.inventorio.config.JwtProperties;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.io.Decoders;
+import io.jsonwebtoken.security.Keys;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
@@ -12,8 +15,13 @@ import java.util.function.Function;
 @Service
 public class JwtService {
 
-    private final SecretKey secretKey = Jwts.SIG.HS256.key().build();
-    private final long jwtExpiration = 86400000; // 24 Hours
+    private final SecretKey secretKey;
+    private final long jwtExpiration;
+
+    public JwtService(JwtProperties jwtProperties) {
+        this.secretKey = Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtProperties.secretKey()));
+        this.jwtExpiration = jwtProperties.expirationMs();
+    }
 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
