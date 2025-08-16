@@ -16,9 +16,11 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -39,8 +41,13 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<ProductResponseDto> findAll() {
-        return productService.findAll().stream()
+    public List<ProductResponseDto> findAll(
+            @RequestParam(required = false) String name,
+            @RequestParam(required = false) Long categoryId,
+            @RequestParam(required = false) BigDecimal minPrice,
+            @RequestParam(required = false) BigDecimal maxPrice
+    ) {
+        return productService.findAll(name, categoryId, minPrice, maxPrice).stream()
                 .map(productMapper::toResponseDto)
                 .collect(Collectors.toList());
     }
