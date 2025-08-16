@@ -1,17 +1,21 @@
 package dev.bendonaldson.inventorio.repository.specification;
 
 import dev.bendonaldson.inventorio.model.Product;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.jpa.domain.Specification;
+
 import java.math.BigDecimal;
 
 public class ProductSpecification {
 
     public static Specification<Product> hasName(String name) {
         return (root, query, criteriaBuilder) -> {
-            if (name == null || name.isEmpty()) {
+            if (StringUtils.isBlank(name)) {
                 return criteriaBuilder.conjunction();
             }
-            return criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), "%" + name.toLowerCase() + "%");
+
+            String pattern = "%" + name.toLowerCase() + "%";
+            return criteriaBuilder.like(criteriaBuilder.lower(root.get("name")), pattern);
         };
     }
 
