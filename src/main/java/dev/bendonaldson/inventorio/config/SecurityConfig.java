@@ -38,6 +38,7 @@ public class SecurityConfig {
                         // --- PUBLIC ENDPOINTS ---
                         // Allow anyone to register or log in
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/v3/api-docs/**", "/swagger-ui/**", "/swagger-ui.html").permitAll()
 
                         // --- ADMIN-ONLY ENDPOINTS ---
                         // Only users with ADMIN can create, update, or delete products and categories
