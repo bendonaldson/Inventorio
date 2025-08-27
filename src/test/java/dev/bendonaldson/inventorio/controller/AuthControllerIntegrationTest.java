@@ -59,6 +59,7 @@ class AuthControllerIntegrationTest extends AbstractIntegrationTest {
 
         // Assert
         assertEquals(HttpStatus.BAD_REQUEST, errorResponse.getStatusCode());
+        assertNotNull(errorResponse.getBody());
         assertTrue(errorResponse.getBody().contains("is already taken"));
     }
 }

@@ -53,11 +53,13 @@ class ProductControllerIntegrationTest extends AbstractIntegrationTest {
         // Login as admin to get a token
         var adminLogin = new LoginRequestDto("admin", "password");
         ResponseEntity<AuthResponseDto> adminResponse = restTemplate.postForEntity("/api/auth/login", adminLogin, AuthResponseDto.class);
+        assertNotNull(adminResponse.getBody(), "Admin login response body should not be null");
         adminToken = adminResponse.getBody().accessToken();
 
         // Login as user to get a token
         var userLogin = new LoginRequestDto("user", "password");
         ResponseEntity<AuthResponseDto> userResponse = restTemplate.postForEntity("/api/auth/login", userLogin, AuthResponseDto.class);
+        assertNotNull(userResponse.getBody(), "User login response body should not be null");
         userToken = userResponse.getBody().accessToken();
     }
 
