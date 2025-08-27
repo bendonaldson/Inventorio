@@ -18,9 +18,9 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-/*
- * Represents a customer order in the system.
- * An order contains multiple order items and has a status.
+/**
+ * Represents a customer order entity.
+ * An order contains multiple order items and has a status and creation date.
  */
 @Getter
 @Setter
@@ -33,19 +33,29 @@ public class Order {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * The timestamp when the order was created.
+     */
     @NotNull(message = "Order date is required")
     private LocalDateTime orderDate;
 
+    /**
+     * The current status of the order.
+     */
     @NotNull(message = "Status is required")
     @Enumerated(EnumType.STRING)
     private OrderStatus status;
 
+    /**
+     * The list of items included in this order.
+     * The relationship is managed by this entity, and changes cascade to the items.
+     */
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<OrderItem> orderItems = new ArrayList<>();
 
     public Order() {
-        this.orderDate = LocalDateTime.now(); // Default to current time
-        this.status = OrderStatus.PENDING; // Default Status
+        this.orderDate = LocalDateTime.now();
+        this.status = OrderStatus.PENDING;
     }
 
     public Order(OrderStatus status) {

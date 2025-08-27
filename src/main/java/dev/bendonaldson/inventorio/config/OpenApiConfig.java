@@ -8,9 +8,19 @@ import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+/**
+ * Configuration class for Swagger/OpenAPI documentation.
+ */
 @Configuration
 public class OpenApiConfig {
 
+    /**
+     * Configures the OpenAPI bean with API metadata and security scheme details.
+     * This setup includes a title, description, version, and a security scheme
+     * for JWT Bearer authentication, enabling the "Authorize" button in Swagger UI.
+     *
+     * @return A configured OpenAPI object.
+     */
     @Bean
     public OpenAPI customOpenAPI() {
         final String securitySchemeName = "bearerAuth";
