@@ -1,9 +1,9 @@
 package dev.bendonaldson.inventorio.exception;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.web.bind.annotation.ResponseStatus;
-
-@ResponseStatus(HttpStatus.BAD_REQUEST)
+/**
+ * Exception thrown during user registration when the requested username
+ * is already taken.
+ */
 public class UserAlreadyExistsException extends RuntimeException {
     public UserAlreadyExistsException(String message) {
         super(message);

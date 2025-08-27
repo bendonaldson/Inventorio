@@ -18,6 +18,9 @@ import lombok.ToString;
 
 import java.math.BigDecimal;
 
+/**
+ * Represents a product entity in the inventory.
+ */
 @Getter
 @Setter
 @ToString
@@ -29,20 +32,35 @@ public class Product {
     @GeneratedValue(strategy = GenerationType.AUTO)
     private Long id;
 
+    /**
+     * The name of the product.
+     */
     @NotBlank(message = "Name is required")
     private String name;
 
+    /**
+     * A brief description of the product.
+     */
     @NotBlank(message = "Description is required")
     private String description;
 
+    /**
+     * The price of the product.
+     */
     @NotNull(message = "Price is required")
     @DecimalMin(value = "0.0", inclusive = false, message = "Price must be a positive value")
     private BigDecimal price;
 
+    /**
+     * The quantity of the product currently in stock.
+     */
     @NotNull(message = "Quantity is required")
     @Positive(message = "Quantity must be a positive value")
     private int stockQuantity;
 
+    /**
+     * The category to which this product belongs.
+     */
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "category_id")
     private Category category;

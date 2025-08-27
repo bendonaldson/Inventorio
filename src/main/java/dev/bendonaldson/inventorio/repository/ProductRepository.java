@@ -5,7 +5,8 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 
 /**
- * Repository for handling Product data access.
+ * Spring Data JPA repository for {@link Product} entities.
+ * Extends JpaSpecificationExecutor to support dynamic, criteria-based queries.
  */
 public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpecificationExecutor<Product> {
 }

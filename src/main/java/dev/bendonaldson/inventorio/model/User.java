@@ -19,6 +19,10 @@ import org.springframework.security.core.userdetails.UserDetails;
 import java.util.Collection;
 import java.util.Collections;
 
+/**
+ * Represents a user entity for authentication and authorization.
+ * Implements Spring Security's UserDetails interface for seamless integration.
+ */
 @Getter
 @Setter
 @NoArgsConstructor
@@ -38,6 +42,9 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private String password;
 
+    /**
+     * The role assigned to the user, which determines their permissions.
+     */
     @Enumerated(EnumType.STRING)
     private Role role;
 
@@ -47,6 +54,10 @@ public class User implements UserDetails {
         this.role = role;
     }
 
+    /**
+     * Returns the authorities granted to the user.
+     * Spring Security uses this to enforce role-based access control.
+     */
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority(role.name()));

@@ -21,6 +21,9 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.stream.Collectors;
 
+/**
+ * REST controller for managing customer orders.
+ */
 @RestController
 @RequestMapping("/api/orders")
 public class OrderController {
@@ -34,6 +37,11 @@ public class OrderController {
         this.orderMapper = orderMapper;
     }
 
+    /**
+     * Retrieves a list of all orders. (Admin Only)
+     *
+     * @return A list of {@link OrderResponseDto} objects.
+     */
     @GetMapping
     public List<OrderResponseDto> findAll() {
         return orderService.findAll().stream()
@@ -41,6 +49,13 @@ public class OrderController {
                 .collect(Collectors.toList());
     }
 
+    /**
+     * Retrieves a single order by its ID.
+     *
+     * @param id The ID of the order to retrieve.
+     * @return The {@link OrderResponseDto} object.
+     * @throws ResourceNotFoundException if the order with the given ID is not found.
+     */
     @GetMapping("/{id}")
     public OrderResponseDto findById(@PathVariable Long id) {
         return orderService.findById(id)
@@ -48,6 +63,12 @@ public class OrderController {
                 .orElseThrow(() -> new ResourceNotFoundException("Order not found with id " + id));
     }
 
+    /**
+     * Creates a new order.
+     *
+     * @param orderDto The DTO containing the items for the new order.
+     * @return The created {@link OrderResponseDto} with full details.
+     */
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping
     public OrderResponseDto create(@Valid @RequestBody OrderRequestDto orderDto) {
@@ -55,6 +76,11 @@ public class OrderController {
         return orderMapper.toResponseDto(savedOrder);
     }
 
+    /**
+     * Deletes an order by its ID.
+     *
+     * @param id The ID of the order to delete.
+     */
     @ResponseStatus(HttpStatus.NO_CONTENT)
     @DeleteMapping("/{id}")
     public void delete(@PathVariable Long id) {

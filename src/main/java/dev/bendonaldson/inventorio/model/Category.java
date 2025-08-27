@@ -15,8 +15,8 @@ import lombok.ToString;
 import java.util.List;
 
 /**
- * Represents a product category.
- * A category can contain multiple products.
+ * Represents a product category in the database.
+ * A category can be associated with multiple products.
  */
 @Getter
 @Setter
@@ -29,11 +29,18 @@ public class Category {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    /**
+     * The name of the category (e.g., "Electronics", "Books").
+     */
     @NotBlank(message = "Name is required")
     private String name;
 
+    /**
+     * The list of products belonging to this category.
+     * This is the inverse side of the one-to-many relationship.
+     */
     @OneToMany(mappedBy = "category")
-    @JsonIgnore
+    @JsonIgnore // Prevents infinite recursion during JSON serialization.
     private List<Product> products;
 
     public Category() {}

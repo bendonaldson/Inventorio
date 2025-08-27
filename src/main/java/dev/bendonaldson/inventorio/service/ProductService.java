@@ -16,6 +16,9 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Service layer for handling business logic related to Products.
+ */
 @Service
 public class ProductService {
 
@@ -28,6 +31,15 @@ public class ProductService {
         this.categoryRepository = categoryRepository;
     }
 
+    /**
+     * Finds products based on a dynamic set of filter criteria.
+     *
+     * @param name The name to search for (partial, case-insensitive).
+     * @param categoryId The category ID to filter by.
+     * @param minPrice The minimum price to filter by.
+     * @param maxPrice The maximum price to filter by.
+     * @return A list of {@link Product} entities matching the criteria.
+     */
     public List<Product> findAll(String name, Long categoryId, BigDecimal minPrice, BigDecimal maxPrice) {
         Specification<Product> spec = ProductSpecification.hasName(name)
                 .and(ProductSpecification.inCategory(categoryId))

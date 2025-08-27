@@ -14,6 +14,9 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+/**
+ * Service layer for handling user authentication and registration logic.
+ */
 @Service
 public class AuthService {
     private final UserRepository userRepository;
@@ -28,6 +31,13 @@ public class AuthService {
         this.authenticationManager = authenticationManager;
     }
 
+    /**
+     * Registers a new user, hashes their password, and returns a JWT.
+     *
+     * @param request The registration request DTO.
+     * @return An {@link AuthResponseDto} containing the JWT.
+     * @throws UserAlreadyExistsException if the username is already taken.
+     */
     public AuthResponseDto register(RegisterRequestDto request) {
         if (userRepository.findByUsername(request.username()).isPresent()) {
             throw new UserAlreadyExistsException("Username '" + request.username() + "' is already taken.");
@@ -43,6 +53,12 @@ public class AuthService {
         return new AuthResponseDto(jwtToken);
     }
 
+    /**
+     * Authenticates an existing user and returns a new JWT upon success.
+     *
+     * @param request The login request DTO.
+     * @return An {@link AuthResponseDto} containing the JWT.
+     */
     public AuthResponseDto login(LoginRequestDto request) {
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(

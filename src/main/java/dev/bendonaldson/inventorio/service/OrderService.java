@@ -40,6 +40,15 @@ public class OrderService {
         return orderRepository.findById(id);
     }
 
+    /**
+     * Creates a new order and processes its items in a single transaction.
+     * This method validates product stock, deducts the ordered quantity, and saves the order.
+     *
+     * @param orderDto The order request containing the items to be purchased.
+     * @return The saved {@link Order} entity.
+     * @throws ResourceNotFoundException if a product in the order does not exist.
+     * @throws InsufficientStockException if a product's stock is too low.
+     */
     @Transactional
     public Order save(OrderRequestDto orderDto) {
         Order order = new Order();
